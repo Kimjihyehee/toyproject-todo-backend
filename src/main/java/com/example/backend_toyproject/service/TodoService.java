@@ -15,8 +15,9 @@ public class TodoService {
     * 1. 할일 생성
     * */
     public TodoDto createTodo(TodoDto todoDto) {
-        var todoEntity = new TodoEntity(todoDto);
-        TodoEntity a = todoRepository.save(todoEntity); // 저장
-        return new TodoDto(a);
+        TodoEntity todoEntity = new TodoEntity(todoDto);
+        TodoEntity savedTodoEntity = todoRepository.save(todoEntity);
+
+        return new TodoDto(savedTodoEntity);
     };
 }

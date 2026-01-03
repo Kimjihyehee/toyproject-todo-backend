@@ -14,8 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "todo_category_mapping", uniqueConstraints = {
@@ -41,5 +40,5 @@ public class TodoCategoryMappingEntity {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Timestamp createdAt;
 }

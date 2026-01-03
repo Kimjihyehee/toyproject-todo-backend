@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Setter
@@ -24,5 +24,5 @@ public class UserDto {
     @Schema(description = "유저의 닉네임", example = "유저의 닉네임입니다.")
     private String nickname;
     @Schema(description = "계정 생성 시간", example = "2024-01-15T10:30:00", accessMode = Schema.AccessMode.READ_ONLY)
-    private LocalDateTime createdAt;
+    private Timestamp createdAt;
 }

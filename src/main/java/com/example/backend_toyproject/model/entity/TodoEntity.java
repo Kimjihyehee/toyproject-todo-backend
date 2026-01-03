@@ -79,12 +79,6 @@ public class TodoEntity {
         this.description = todoDto.getDescription();
         this.dueDate = todoDto.getDueDate();
         this.priority = todoDto.getPriority() != null ? todoDto.getPriority() : Priority.NORMAL;
-        this.status = todoDto.getStatus() != null ? todoDto.getStatus() : TodoStatus.CREATED;
-        this.completed = todoDto.isCompleted();
-        this.completedAt = todoDto.getCompletedAt() != null ? todoDto.getCompletedAt() : todoDto.getCreatedAt();
-        this.createdAt = todoDto.getCreatedAt();
-        this.updatedAt = todoDto.getUpdatedAt();
-        this.deletedAt = todoDto.getDeletedAt();
     }
 }
 

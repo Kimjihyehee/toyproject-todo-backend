@@ -1,6 +1,5 @@
 package com.example.backend_toyproject.model.dto;
 
-import com.example.backend_toyproject.model.entity.CategoryEntity;
 import com.example.backend_toyproject.model.entity.TodoCategoryMappingEntity;
 import com.example.backend_toyproject.model.entity.TodoEntity;
 import com.example.backend_toyproject.model.enums.Priority;
@@ -56,7 +55,7 @@ public class TodoDto {
                 : todoEntity.getCategoryLinks().stream()
                 .map(TodoCategoryMappingEntity::getCategory)
                 .filter(Objects::nonNull)
-                .map(CategorySummaryDto::CategorySummaryDto)
+                .map(CategorySummaryDto::new)
                 .toList();
     }
 }
