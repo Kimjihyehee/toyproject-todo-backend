@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: backend_Toyproject
+
+#  autoconfigure:
+#    exclude:
+#      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+#      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+
+  datasource:
+    url: jdbc:sqlite:todo.db
+    driver-class-name: org.sqlite.JDBC
+    # Connection Pool
+    hikari:
+      maximum-pool-size: 1
+      connection-timeout: 30000
+      idle-timeout: 60000
+      max-lifetime: 1800000
+
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true # 실행되는 SQL을 콘솔에 출력
+    properties:
+      hibernate:
+        format_sql: true # SQL을 줄바꿈 + 들여쓰기해서 출력
+        use_sql_comments: true # SQL위에 Hibernate 주석 추가
+        highlight_sql: true # SQL로그에 색상(ANSI컬러) 적용
+        jdbc:
+          batch_size: 0 # JDBC Batch 처리 크기 ('0' : 배치 기능 off)
+        # hibernate가 INSERT / UPDATE 실행순서를 임의로 바꾸지 않도록 설정
+        order_inserts: false
+        order_updates: true
+    open-in-view: false # Service계층만 DB 접근
+
+# Swagger (최상위)
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /api-docs
+  show-actuator: true
+
+
+# Logging (최상위)
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web: DEBUG
+
+
+# Server (최상위)
+server:
+  port: 8080
+  servlet:
+    context-path: /api

@@ -1,0 +1,90 @@
+package com.example.backend_toyproject.model.entity;
+
+import com.example.backend_toyproject.model.dto.TodoDto;
+import com.example.backend_toyproject.model.enums.Priority;
+import com.example.backend_toyproject.model.enums.TodoStatus;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Entity
+@Table(name = "todo")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class TodoEntity {
+    @Id
+    @GeneratedValue
+    private UUID id;
+
+    @Column(name = "user_id")
+    private UUID userId;
+
+    @Column(name = "title", nullable = false)
+    private String title;
+
+    @Column(name = "description", length = 1000)
+    private String description;
+
+    @Column(name = "due_date")
+    private Timestamp dueDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "priority", nullable = false, length = 10)
+    private Priority priority = Priority.NORMAL;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 15)
+    private TodoStatus status = TodoStatus.CREATED;
+
+    @Column(name = "completed", nullable = false)
+    private boolean completed = false;
+
+    @Column(name = "completed_at")
+    private Timestamp completedAt;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Timestamp createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
+
+    @Column(name = "deleted_at")
+    private Timestamp deletedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
+
+    @OneToMany(mappedBy = "todo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TodoCategoryMappingEntity> categoryLinks = new ArrayList<>();
+
+    // DTO -> Entity 변환
+    public TodoEntity(TodoDto todoDto) {
+        this.id = todoDto.getId();
+        this.userId = todoDto.getUserId();
+        this.title = todoDto.getTitle() != null ? todoDto.getTitle() : "";
+        this.description = todoDto.getDescription();
+        this.dueDate = todoDto.getDueDate();
+        this.priority = todoDto.getPriority() != null ? todoDto.getPriority() : Priority.NORMAL;
+        this.status = todoDto.getStatus() != null ? todoDto.getStatus() : TodoStatus.CREATED;
+        this.completed = todoDto.isCompleted();
+        this.completedAt = todoDto.getCompletedAt() != null ? todoDto.getCompletedAt() : todoDto.getCreatedAt();
+        this.createdAt = todoDto.getCreatedAt();
+        this.updatedAt = todoDto.getUpdatedAt();
+        this.deletedAt = todoDto.getDeletedAt();
+    }
+}
+
