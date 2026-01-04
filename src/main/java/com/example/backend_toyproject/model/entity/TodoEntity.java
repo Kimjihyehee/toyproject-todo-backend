@@ -27,9 +27,6 @@ public class TodoEntity {
     @GeneratedValue
     private UUID id;
 
-    @Column(name = "user_id")
-    private UUID userId;
-
     @Column(name = "title", nullable = false)
     private String title;
 
@@ -74,7 +71,6 @@ public class TodoEntity {
     // DTO -> Entity 변환
     public TodoEntity(TodoDto todoDto) {
         this.id = todoDto.getId();
-        this.userId = todoDto.getUserId();
         this.title = todoDto.getTitle() != null ? todoDto.getTitle() : "";
         this.description = todoDto.getDescription();
         this.dueDate = todoDto.getDueDate();
