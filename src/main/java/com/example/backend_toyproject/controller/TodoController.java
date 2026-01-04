@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/todo")
+@RequestMapping("/todo")
 @Validated
 @RequiredArgsConstructor
 public class TodoController {
@@ -18,7 +18,7 @@ public class TodoController {
      * 1. 할일 생성
      */
     @PostMapping("/create")
-    public TodoDto createTodo(TodoDto todoDto) {
+    public TodoDto createTodo(@RequestBody TodoDto todoDto) {
         return todoService.createTodo(todoDto);
     }
 }
