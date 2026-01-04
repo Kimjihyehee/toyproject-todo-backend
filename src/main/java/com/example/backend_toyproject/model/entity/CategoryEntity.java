@@ -47,8 +47,8 @@ public class CategoryEntity {
     private Timestamp createdAt;
 
     @UpdateTimestamp
-    @Column(name = "modify_date")
-    private Timestamp modifyDate;
+    @Column(name = "modified_at")
+    private Timestamp modifiedDate;
 
     @Column(name = "deleted_at")
     private Timestamp deletedAt;
