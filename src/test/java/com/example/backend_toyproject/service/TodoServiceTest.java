@@ -17,7 +17,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -301,8 +303,9 @@ class TodoServiceTest {
                 0,
                 10
         ))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("월이 없는 일 조회는 불가합니다.");
+                .isInstanceOfSatisfying(ResponseStatusException.class, ex ->
+                        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST)
+                );
     }
 
     @Test
@@ -323,8 +326,9 @@ class TodoServiceTest {
                 0,
                 10
         ))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("month는 1~12 사이여야 합니다.");
+                .isInstanceOfSatisfying(ResponseStatusException.class, ex ->
+                        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST)
+                );
 
         // day invalid
         assertThatThrownBy(() -> todoService.getTodo(
@@ -338,8 +342,78 @@ class TodoServiceTest {
                 0,
                 10
         ))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("day는 1~31 사이여야 합니다.");
+                .isInstanceOfSatisfying(ResponseStatusException.class, ex ->
+                        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST)
+                );
+    }
+
+    @Test
+    @DisplayName("getTodo - 유효하지 않은 날짜 조합(예: 2/30)이면 400(BAD_REQUEST) 예외가 발생한다")
+    void testGetTodo_InvalidDateCombination_Feb30_ThrowsBadRequest() {
+        // given
+        UserEntity user = saveFakeUser();
+
+        // when & then
+        assertThatThrownBy(() -> todoService.getTodo(
+                user.getId(),
+                TodoViewType.DAY,
+                2026,
+                2,
+                30,
+                SortType.END_DATE,
+                SortDirection.ASC,
+                0,
+                10
+        ))
+                .isInstanceOfSatisfying(ResponseStatusException.class, ex ->
+                        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST)
+                );
+    }
+
+    @Test
+    @DisplayName("getTodo - 유효하지 않은 날짜 조합(예: 4/31)이면 400(BAD_REQUEST) 예외가 발생한다")
+    void testGetTodo_InvalidDateCombination_Apr31_ThrowsBadRequest() {
+        // given
+        UserEntity user = saveFakeUser();
+
+        // when & then
+        assertThatThrownBy(() -> todoService.getTodo(
+                user.getId(),
+                TodoViewType.DAY,
+                2026,
+                4,
+                31,
+                SortType.END_DATE,
+                SortDirection.ASC,
+                0,
+                10
+        ))
+                .isInstanceOfSatisfying(ResponseStatusException.class, ex ->
+                        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST)
+                );
+    }
+
+    @Test
+    @DisplayName("getTodo - day만 있고 month가 없으면 400(BAD_REQUEST) 예외가 발생한다")
+    void testGetTodo_DayWithoutMonth_ThrowsBadRequest() {
+        // given
+        UserEntity user = saveFakeUser();
+
+        // when & then
+        assertThatThrownBy(() -> todoService.getTodo(
+                user.getId(),
+                TodoViewType.DAY,
+                2026,
+                null,
+                2,
+                SortType.END_DATE,
+                SortDirection.ASC,
+                0,
+                10
+        ))
+                .isInstanceOfSatisfying(ResponseStatusException.class, ex ->
+                        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST)
+                );
     }
 
     @Test
