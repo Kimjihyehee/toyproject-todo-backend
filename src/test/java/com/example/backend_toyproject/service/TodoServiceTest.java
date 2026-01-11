@@ -536,6 +536,71 @@ class TodoServiceTest {
                 .hasMessageContaining("Todo not found");
     }
 
+    @Test
+    @DisplayName("getTodoDetail - 단일 유저의 todo 단건 조회가 성공한다")
+    void testGetTodoDetail_Success() {
+        // given
+        UserEntity user = saveFakeUser();
+        Timestamp start = Timestamp.valueOf("2026-01-01 09:00:00");
+        Timestamp end = Timestamp.valueOf("2026-01-01 10:00:00");
+        TodoEntity todo = saveTodo(user, "todo", start, end);
+
+        // when
+        TodoDto result = todoService.getTodoDetail(user.getId(), todo.getId());
+
+        // then
+        assertThat(result.getId()).isEqualTo(todo.getId());
+        assertThat(result.getUserId()).isEqualTo(user.getId());
+        assertThat(result.getStartDate()).isEqualTo(start);
+        assertThat(result.getEndDate()).isEqualTo(end);
+    }
+
+    @Test
+    @DisplayName("getTodoDetail - 존재하지 않는 유저면 예외가 발생한다")
+    void testGetTodoDetail_UserNotFound_Throws() {
+        // given
+        UUID missingUserId = UUID.randomUUID();
+        UUID anyTodoId = UUID.randomUUID();
+
+        // when & then
+        assertThatThrownBy(() -> todoService.getTodoDetail(missingUserId, anyTodoId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("User not found");
+    }
+
+    @Test
+    @DisplayName("getTodoDetail - 존재하지 않는 todo면 예외가 발생한다")
+    void testGetTodoDetail_TodoNotFound_Throws() {
+        // given
+        UserEntity user = saveFakeUser();
+        UUID missingTodoId = UUID.randomUUID();
+
+        // when & then
+        assertThatThrownBy(() -> todoService.getTodoDetail(user.getId(), missingTodoId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Todo not found");
+    }
+
+    @Test
+    @DisplayName("getTodoDetail - 다른 유저의 todoId로 조회하면 예외가 발생한다")
+    void testGetTodoDetail_OtherUsersTodo_Throws() {
+        // given
+        UserEntity owner = saveFakeUser();
+        UserEntity otherUser = saveFakeUser();
+
+        TodoEntity ownersTodo = saveTodo(
+                owner,
+                "todo",
+                Timestamp.valueOf("2026-01-01 09:00:00"),
+                Timestamp.valueOf("2026-01-01 10:00:00")
+        );
+
+        // when & then
+        assertThatThrownBy(() -> todoService.getTodoDetail(otherUser.getId(), ownersTodo.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Todo not found");
+    }
+
     private TodoEntity saveTodo(UserEntity user, String title, Timestamp startDate, Timestamp endDate) {
         TodoEntity todo = new TodoEntity();
         todo.setUser(user);
