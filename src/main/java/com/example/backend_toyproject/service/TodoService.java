@@ -15,9 +15,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -72,39 +76,70 @@ public class TodoService {
         userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
         // 2. param : viewType은 Month 이면서,
-        // month가 값이 없고, day의 값이 존재 -> 에러처리
-        if(viewType == TodoViewType.MONTH && month == null && day != null) {
-            throw new IllegalArgumentException("월이 없는 일 조회는 불가합니다.");
+        // month가 값이 없고, day의 값이 존재 -> 예외 처리
+        if (viewType == TodoViewType.MONTH && month == null && day != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "월이 없는 일 조회는 불가합니다.");
         }
 
-        // 3. month, day 존재할 수 없는 값 체크
+         // 3. month, day 존재할 수 없는 값 체크
         if (month != null && (month < 1 || month > 12)) {
-            throw new IllegalArgumentException("month는 1~12 사이여야 합니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "month는 1~12 사이여야 합니다.");
         }
-
         if (day != null && (day < 1 || day > 31)) {
-            throw new IllegalArgumentException("day는 1~31 사이여야 합니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "day는 1~31 사이여야 합니다.");
         }
 
-        // 4. 기간(startDate~endDate)이 조회하려는 기간(year/month/day)과 겹치면 조회
+        // 4. day만 있고 month가 없으면 400 처리
+        if (day != null && month == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "day는 month와 함께 전달되어야 합니다.");
+        }
+
+        // 5. month+day 조합 유효성 검증 (예: 2/30, 4/31 차단)
+        if (month != null && day != null) {
+            try {
+                LocalDate.of(year, month, day);
+            } catch (DateTimeException e) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "유효하지 않은 날짜입니다: %d-%02d-%02d".formatted(year, month, day)
+                );
+            }
+        }
+
+        // 6. 기간(startDate~endDate)이 조회하려는 기간(year/month/day)과 겹치면 조회
         // Timestamp 타입 변수 선언
         Timestamp startTs;
         Timestamp endTs;
 
-        if(month != null && day == null) { // 입력 조회기간: 년월
-            // MONTH 조회
-            LocalDateTime queryStart = LocalDateTime.of(year, month, 1, 0, 0);
-            LocalDateTime queryEnd = queryStart.plusMonths(1);
+        if(month != null && day == null) { // 입력 : 년월
+            try {
+                // MONTH 조회
+                LocalDateTime queryStart = LocalDateTime.of(year, month, 1, 0, 0);
+                LocalDateTime queryEnd = queryStart.plusMonths(1);
 
-            startTs = Timestamp.valueOf(queryStart);
-            endTs = Timestamp.valueOf(queryEnd);
-        } else if(month != null && day != null){ // 입력 조회기간: 년월일
-            // DAY 조회
-            LocalDateTime queryStart = LocalDateTime.of(year, month, day, 0, 0);
-            LocalDateTime queryEnd = queryStart.plusDays(1);
+                startTs = Timestamp.valueOf(queryStart);
+                endTs = Timestamp.valueOf(queryEnd);
+            }
+            catch (DateTimeException e) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "유효하지 않은 날짜입니다: %d-%02d".formatted(year, month)
+                );
+            }
+        }
+        else if (month != null && day != null) { // 입력 : 년월일
+            try {
+                LocalDateTime queryStart = LocalDateTime.of(year, month, day, 0, 0);
+                LocalDateTime queryEnd = queryStart.plusDays(1);
 
-            startTs = Timestamp.valueOf(queryStart);
-            endTs = Timestamp.valueOf(queryEnd);
+                startTs = Timestamp.valueOf(queryStart);
+                endTs = Timestamp.valueOf(queryEnd);
+            } catch (DateTimeException e) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "유효하지 않은 날짜입니다: %d-%02d-%02d".formatted(year, month, day)
+                );
+            }
         } else {
             // YEAR 조회 (선택)
             LocalDateTime queryStart = LocalDateTime.of(year, 1, 1, 0, 0);
@@ -114,15 +149,15 @@ public class TodoService {
             endTs = Timestamp.valueOf(queryEnd);
         }
 
-        // 4. 정렬 필드 결정
+        // 7. 정렬 필드 결정: sortType(enum) -> Entity 필드명(String) 매핑
         String sortField = resolveSortField(sortType);
-        // 5. 정렬 방향 결정
+        // 8. 정렬 방향 결정: direction(도메인 enum) -> Spring Data Sort.Direction(ASC/DESC) 변환
         Sort.Direction sortDirection = resolveDirection(direction);
-        // 6. Sort + Pageable 생성
+        // 9. Sort + Pageable 생성
         Sort sort = Sort.by(sortDirection, sortField);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        // 7. 조회 (기간 겹침 조건)
+        // 10. 조회: 삭제되지 않은(deletedAt IS NULL) 할 일 중, [todo.startDate < queryEnd] AND [todo.endDate > queryStart] 로 기간이 겹치는 데이터 페이징 조회
         Page<TodoEntity> todoPage =
                 todoRepository.findByUser_IdAndDeletedAtIsNullAndStartDateLessThanAndEndDateGreaterThan(
                         userId,
@@ -130,7 +165,7 @@ public class TodoService {
                         startTs,   // Todo.endDate   > queryStart
                         pageable
                 );
-        // 8. Entity -> DTO 변환된 값으로 return
+        // 11. Entity -> DTO 변환된 값으로 return
         return todoPage.getContent()
                 .stream()
                 .map(TodoDto::new)
