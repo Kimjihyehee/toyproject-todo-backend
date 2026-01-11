@@ -41,4 +41,13 @@ public class TodoCategoryMappingEntity {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
+
+    public TodoCategoryMappingEntity(TodoEntity todo, CategoryEntity category) {
+        this.todo = todo;
+        this.category = category;
+        this.id = new TodoCategoryMappingId(
+                todo.getId(),
+                category.getId()
+        );
+    }
 }
