@@ -74,4 +74,12 @@ public class TodoController {
         return todoService.getTodoDetail(userId, todoId);
     }
 
+    /*
+     * 5. 할일 삭제
+     */
+    @DeleteMapping("{userId}/{todoId}")
+    public TodoDto deleteTodo(@PathVariable UUID userId, @PathVariable UUID todoId){
+        return todoService.deleteTodo(userId, todoId);
+    }
+
 }

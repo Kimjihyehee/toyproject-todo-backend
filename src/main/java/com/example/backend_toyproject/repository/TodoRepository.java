@@ -11,10 +11,11 @@ import java.util.UUID;
 
 public interface TodoRepository extends JpaRepository<TodoEntity, UUID> {
     // 할일 전체 조회 (단일 유저)
-    Page<TodoEntity> findByUser_IdAndStartDateLessThanAndEndDateGreaterThan(UUID userId, Timestamp endTs, Timestamp startTs, Pageable pageable);
+    Page<TodoEntity> findByUser_IdAndDeletedAtIsNullAndStartDateLessThanAndEndDateGreaterThan
+    (UUID userId, Timestamp endTs, Timestamp startTs, Pageable pageable);
 
     // UUID user(UserEntity user);
 
     // 할일 단건 조회 (단일 유저)
-    Optional<TodoEntity> findByIdAndUser_Id(UUID todoId, UUID userId);
+    Optional<TodoEntity> findByIdAndUser_IdAndDeletedAtIsNull(UUID todoId, UUID userId);
 }

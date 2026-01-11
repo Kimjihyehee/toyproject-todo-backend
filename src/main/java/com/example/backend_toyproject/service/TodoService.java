@@ -124,7 +124,7 @@ public class TodoService {
 
         // 7. 조회 (기간 겹침 조건)
         Page<TodoEntity> todoPage =
-                todoRepository.findByUser_IdAndStartDateLessThanAndEndDateGreaterThan(
+                todoRepository.findByUser_IdAndDeletedAtIsNullAndStartDateLessThanAndEndDateGreaterThan(
                         userId,
                         endTs,     // Todo.startDate < queryEnd
                         startTs,   // Todo.endDate   > queryStart
@@ -224,10 +224,26 @@ public class TodoService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
-        TodoEntity todo = todoRepository.findByIdAndUser_Id(todoId, userId)
+        TodoEntity todo = todoRepository.findByIdAndUser_IdAndDeletedAtIsNull(todoId, userId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Todo not found: " + todoId)
                 );
+
+        return new TodoDto(todo);
+    }
+
+    @Transactional
+    public TodoDto deleteTodo(UUID userId, UUID todoId) {
+        // 1. 유저 존재 확인
+        userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        // 2. 해당하는 할일 항목 찾기
+        // 없는 경우, 예외 처리
+        TodoEntity todo = todoRepository.findByIdAndUser_IdAndDeletedAtIsNull(todoId, userId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Todo not found: " + todoId)
+                );
+        // 3. deletedAt에 값 set
+        todo.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
 
         return new TodoDto(todo);
     }
