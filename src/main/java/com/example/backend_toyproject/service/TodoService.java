@@ -215,4 +215,17 @@ public class TodoService {
         }
         return new TodoDto(todo);
     }
+
+    /*
+     * 4. 할일 단건 조회 (단일 유저)
+     */
+    public TodoDto getTodoDetail(UUID userId, UUID todoId) {
+
+        TodoEntity todo = todoRepository.findByIdAndUser_Id(todoId, userId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Todo not found for user: " + userId)
+                );
+
+        return new TodoDto(todo);
+    }
 }

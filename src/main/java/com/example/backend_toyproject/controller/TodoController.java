@@ -65,4 +65,13 @@ public class TodoController {
     public TodoDto updateTodo(@Valid @RequestBody TodoUpdateRequestDTO todoUpdateRequestDTO) {
         return todoService.updateTodo(todoUpdateRequestDTO);
     }
+
+    /*
+     * 4. 할일 단건 조회 (단일 유저)
+     */
+    @GetMapping("/{userId}/{todoId}")
+    public TodoDto getTodoDetail(@PathVariable UUID userId, @PathVariable UUID todoId){
+        return todoService.getTodoDetail(userId, todoId);
+    }
+
 }
