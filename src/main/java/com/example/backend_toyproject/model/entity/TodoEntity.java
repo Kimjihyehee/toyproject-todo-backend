@@ -33,8 +33,11 @@ public class TodoEntity {
     @Column(name = "description", length = 1000)
     private String description;
 
-    @Column(name = "due_date")
-    private Timestamp dueDate;
+    @Column(name = "start_date")
+    private Timestamp startDate;
+
+    @Column(name = "end_date")
+    private Timestamp endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "priority", nullable = false, length = 10)
@@ -73,7 +76,8 @@ public class TodoEntity {
         this.id = todoDto.getId();
         this.title = todoDto.getTitle() != null ? todoDto.getTitle() : "";
         this.description = todoDto.getDescription();
-        this.dueDate = todoDto.getDueDate();
+        this.startDate = todoDto.getStartDate();
+        this.endDate = todoDto.getEndDate();
         this.priority = todoDto.getPriority() != null ? todoDto.getPriority() : Priority.NORMAL;
     }
 }

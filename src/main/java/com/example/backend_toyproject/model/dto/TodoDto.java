@@ -24,7 +24,8 @@ public class TodoDto {
     private UUID userId;
     private String title;
     private String description;
-    private Timestamp dueDate;
+    private Timestamp startDate;
+    private Timestamp endDate;
     private Priority priority;
     private TodoStatus status;
     private boolean completed;
@@ -41,7 +42,8 @@ public class TodoDto {
         this.userId = todoEntity.getUser().getId();
         this.title = todoEntity.getTitle();
         this.description = todoEntity.getDescription();
-        this.dueDate = todoEntity.getDueDate();
+        this.startDate = todoEntity.getStartDate();
+        this.endDate = todoEntity.getEndDate();
         this.priority = todoEntity.getPriority();
         this.status = todoEntity.getStatus();
         this.completed = todoEntity.isCompleted();
