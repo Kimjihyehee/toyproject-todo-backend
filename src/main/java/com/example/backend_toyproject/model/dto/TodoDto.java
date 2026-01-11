@@ -1,6 +1,5 @@
 package com.example.backend_toyproject.model.dto;
 
-import com.example.backend_toyproject.model.entity.CategoryEntity;
 import com.example.backend_toyproject.model.entity.TodoCategoryMappingEntity;
 import com.example.backend_toyproject.model.entity.TodoEntity;
 import com.example.backend_toyproject.model.enums.Priority;
@@ -25,7 +24,8 @@ public class TodoDto {
     private UUID userId;
     private String title;
     private String description;
-    private Timestamp dueDate;
+    private Timestamp startDate;
+    private Timestamp endDate;
     private Priority priority;
     private TodoStatus status;
     private boolean completed;
@@ -42,7 +42,8 @@ public class TodoDto {
         this.userId = todoEntity.getUser().getId();
         this.title = todoEntity.getTitle();
         this.description = todoEntity.getDescription();
-        this.dueDate = todoEntity.getDueDate();
+        this.startDate = todoEntity.getStartDate();
+        this.endDate = todoEntity.getEndDate();
         this.priority = todoEntity.getPriority();
         this.status = todoEntity.getStatus();
         this.completed = todoEntity.isCompleted();
@@ -56,7 +57,7 @@ public class TodoDto {
                 : todoEntity.getCategoryLinks().stream()
                 .map(TodoCategoryMappingEntity::getCategory)
                 .filter(Objects::nonNull)
-                .map(CategorySummaryDto::CategorySummaryDto)
+                .map(CategorySummaryDto::new)
                 .toList();
     }
 }

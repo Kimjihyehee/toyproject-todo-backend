@@ -1,6 +1,5 @@
 package com.example.backend_toyproject.model.entity;
 
-import com.example.backend_toyproject.model.dto.CategorySummaryDto;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,16 +39,16 @@ public class CategoryEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "is_default", nullable = false)
-    private boolean isDefault = false;
+    @Column(name = "uncategorized", nullable = false)
+    private boolean uncategorized = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
 
     @UpdateTimestamp
-    @Column(name = "modify_date")
-    private Timestamp modifyDate;
+    @Column(name = "modified_at")
+    private Timestamp modifiedDate;
 
     @Column(name = "deleted_at")
     private Timestamp deletedAt;
@@ -61,11 +60,4 @@ public class CategoryEntity {
     @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
     private List<TodoCategoryMappingEntity> todoLinks = new ArrayList<>();
 
-    // DTO -> Entity 변환
-//    public CategoryEntity(CategorySummaryDto categorySummaryDto) {
-//        this.id = categorySummaryDto.getId();
-//        this.name = categorySummaryDto.getName();
-//        this.description = categorySummaryDto.getDescription() != null ? categorySummaryDto.getDescription() : "";
-//        this.isDefault = categorySummaryDto.isDefault();
-//    }
 }
