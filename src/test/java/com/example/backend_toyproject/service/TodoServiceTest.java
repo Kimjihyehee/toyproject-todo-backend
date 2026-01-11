@@ -601,6 +601,111 @@ class TodoServiceTest {
                 .hasMessageContaining("Todo not found");
     }
 
+    @Test
+    @DisplayName("deleteTodo - deletedAt이 세팅된다(soft delete)")
+    void testDeleteTodo_SetsDeletedAt() {
+        // given
+        UserEntity user = saveFakeUser();
+        TodoEntity todo = saveTodo(
+                user,
+                "todo",
+                Timestamp.valueOf("2026-01-01 09:00:00"),
+                Timestamp.valueOf("2026-01-01 10:00:00")
+        );
+
+        // when
+        TodoDto deleted = todoService.deleteTodo(user.getId(), todo.getId());
+        todoRepository.flush();
+
+        // then (반환 DTO)
+        assertThat(deleted.getId()).isEqualTo(todo.getId());
+        assertThat(deleted.getUserId()).isEqualTo(user.getId());
+        assertThat(deleted.getDeletedAt()).isNotNull();
+
+        // then (DB)
+        TodoEntity saved = todoRepository.findById(todo.getId()).orElseThrow();
+        assertThat(saved.getDeletedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("deleteTodo - 삭제 후 getTodoDetail에서 제외된다")
+    void testDeleteTodo_ThenGetTodoDetail_Throws() {
+        // given
+        UserEntity user = saveFakeUser();
+        TodoEntity todo = saveTodo(
+                user,
+                "todo",
+                Timestamp.valueOf("2026-01-01 09:00:00"),
+                Timestamp.valueOf("2026-01-01 10:00:00")
+        );
+        todoService.deleteTodo(user.getId(), todo.getId());
+        todoRepository.flush();
+
+        // when & then
+        assertThatThrownBy(() -> todoService.getTodoDetail(user.getId(), todo.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Todo not found");
+    }
+
+    @Test
+    @DisplayName("deleteTodo - 삭제 후 getTodo(전체조회)에서 제외된다")
+    void testDeleteTodo_ExcludedFromGetTodoList() {
+        // given
+        UserEntity user = saveFakeUser();
+        TodoEntity willBeDeleted = saveTodo(
+                user,
+                "deleted",
+                Timestamp.valueOf("2026-01-10 09:00:00"),
+                Timestamp.valueOf("2026-01-10 10:00:00")
+        );
+        TodoEntity kept = saveTodo(
+                user,
+                "kept",
+                Timestamp.valueOf("2026-01-11 09:00:00"),
+                Timestamp.valueOf("2026-01-11 10:00:00")
+        );
+        todoService.deleteTodo(user.getId(), willBeDeleted.getId());
+        todoRepository.flush();
+
+        // when
+        List<TodoDto> result = todoService.getTodo(
+                user.getId(),
+                TodoViewType.MONTH,
+                2026,
+                1,
+                null,
+                SortType.END_DATE,
+                SortDirection.ASC,
+                0,
+                10
+        );
+
+        // then
+        assertThat(result).extracting(TodoDto::getId)
+                .contains(kept.getId())
+                .doesNotContain(willBeDeleted.getId());
+    }
+
+    @Test
+    @DisplayName("deleteTodo - 이미 삭제된 todo를 다시 삭제하면 예외가 발생한다(없는 것처럼)")
+    void testDeleteTodo_SecondDelete_Throws() {
+        // given
+        UserEntity user = saveFakeUser();
+        TodoEntity todo = saveTodo(
+                user,
+                "todo",
+                Timestamp.valueOf("2026-01-01 09:00:00"),
+                Timestamp.valueOf("2026-01-01 10:00:00")
+        );
+        todoService.deleteTodo(user.getId(), todo.getId());
+        todoRepository.flush();
+
+        // when & then
+        assertThatThrownBy(() -> todoService.deleteTodo(user.getId(), todo.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Todo not found");
+    }
+
     private TodoEntity saveTodo(UserEntity user, String title, Timestamp startDate, Timestamp endDate) {
         TodoEntity todo = new TodoEntity();
         todo.setUser(user);
