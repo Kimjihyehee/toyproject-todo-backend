@@ -220,10 +220,13 @@ public class TodoService {
      * 4. 할일 단건 조회 (단일 유저)
      */
     public TodoDto getTodoDetail(UUID userId, UUID todoId) {
+        // 1. 유저 존재 확인
+        userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
         TodoEntity todo = todoRepository.findByIdAndUser_Id(todoId, userId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Todo not found for user: " + userId)
+                        new IllegalArgumentException("Todo not found: " + todoId)
                 );
 
         return new TodoDto(todo);
