@@ -205,8 +205,8 @@ public class TodoService {
         // 0. 유저 존재 확인
         userRepository.findById(dto.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found: " + dto.getUserId()));
 
-        // 1. 유저 해당 할일 항목의 정보를 조회
-        TodoEntity todo = todoRepository.findById(dto.getTodoId()).orElseThrow(() -> new IllegalArgumentException("Todo not found:"));
+        // 1. 유저 해당 할일 항목의 정보(삭제되지 않은 할일만)를 조회
+        TodoEntity todo = todoRepository.findByIdAndUser_IdAndDeletedAtIsNull(dto.getTodoId(), dto.getUserId()).orElseThrow(() -> new IllegalArgumentException("Todo not found:"));
 
         // 수정 여부 확인
         boolean isUpdated = false;
