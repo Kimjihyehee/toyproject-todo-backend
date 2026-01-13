@@ -12,6 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -76,9 +77,33 @@ public class TodoEntity {
         this.id = todoDto.getId();
         this.title = todoDto.getTitle() != null ? todoDto.getTitle() : "";
         this.description = todoDto.getDescription();
-        this.startDate = todoDto.getStartDate();
-        this.endDate = todoDto.getEndDate();
+        // startDate: 없으면 now
+        Timestamp start = todoDto.getStartDate() != null
+                ? todoDto.getStartDate()
+                : Timestamp.valueOf(LocalDateTime.now());
+        this.startDate = start;
+
+        // endDate: 없으면 startDate 기준 "다음날 00:00" (exclusive)
+        this.endDate = todoDto.getEndDate() != null
+                ? todoDto.getEndDate()
+                : Timestamp.valueOf(
+                start.toLocalDateTime()
+                        .toLocalDate()
+                        .plusDays(1)
+                        .atStartOfDay()
+        );
+
         this.priority = todoDto.getPriority() != null ? todoDto.getPriority() : Priority.NORMAL;
+        this.completed = todoDto.isCompleted();
+
+        // 할일을 완료한 경우 -> status : COMPLETED, completedAt : 완료한 시간
+        if(this.completed) {
+            this.status = TodoStatus.COMPLETED; // status도 COMPLTED
+            this.completedAt = new Timestamp(System.currentTimeMillis());
+        } else { // 할일을 완료하지 않은 경우 -> status : CREATED, completedAt : null
+            this.status = TodoStatus.CREATED;
+            this.completedAt = null;
+        }
     }
 }
 

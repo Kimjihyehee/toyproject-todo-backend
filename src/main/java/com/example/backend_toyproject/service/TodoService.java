@@ -5,6 +5,7 @@ import com.example.backend_toyproject.model.dto.todoUpdate.TodoUpdateRequestDTO;
 import com.example.backend_toyproject.model.entity.*;
 import com.example.backend_toyproject.model.enums.SortDirection;
 import com.example.backend_toyproject.model.enums.SortType;
+import com.example.backend_toyproject.model.enums.TodoStatus;
 import com.example.backend_toyproject.model.enums.TodoViewType;
 import com.example.backend_toyproject.repository.CategoryRepository;
 import com.example.backend_toyproject.repository.TodoRepository;
@@ -207,24 +208,33 @@ public class TodoService {
         // 1. 유저 해당 할일 항목의 정보를 조회
         TodoEntity todo = todoRepository.findById(dto.getTodoId()).orElseThrow(() -> new IllegalArgumentException("Todo not found:"));
 
-        // 수정하려 한 필드를 set
+        // 수정 여부 확인
+        boolean isUpdated = false;
+
+        // 수정값 update
         if(dto.getTitle() != null) {
             todo.setTitle(dto.getTitle());
+            isUpdated = true;
         }
         if(dto.getDescription() != null) {
             todo.setDescription(dto.getDescription());
+            isUpdated = true;
         }
         if(dto.getStartDate() != null) {
             todo.setStartDate(dto.getStartDate());
+            isUpdated = true;
         }
         if(dto.getEndDate() != null) {
             todo.setEndDate(dto.getEndDate());
+            isUpdated = true;
         }
         if(dto.getPriority() != null) {
-            todo.setPriority(dto.getPriority());
+            todo.setPriority(dto.getPriority());    
+            isUpdated = true;
         }
         if(dto.getCompleted() != null) {
             todo.setCompleted(dto.getCompleted());
+            isUpdated = true;
         }
         // category 필드 수정 의도 있을 경우
         if(dto.getCategories() != null) {
@@ -247,7 +257,14 @@ public class TodoService {
                 todo.getCategoryLinks()
                         .add(new TodoCategoryMappingEntity(todo, category));
             }
+            isUpdated = true;
         }
+        //
+        // todo 변경 시 -> TodoStatus : UPDATED로 변경
+        if(isUpdated == true) { 
+            todo.setStatus(TodoStatus.UPDATED);
+        }
+
         return new TodoDto(todo);
     }
 
