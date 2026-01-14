@@ -10,7 +10,6 @@ import com.example.backend_toyproject.model.enums.TodoViewType;
 import com.example.backend_toyproject.repository.CategoryRepository;
 import com.example.backend_toyproject.repository.TodoRepository;
 import com.example.backend_toyproject.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional 
 @RequiredArgsConstructor
 public class TodoService {
     private final TodoRepository todoRepository;
@@ -62,6 +63,7 @@ public class TodoService {
      * 정렬 유형 : 생성일순, 마감일순, 우선순위순, 완료/미완료순  - 1개만 선택 가능 & 기본값 : 생성일순
      * 정렬 방향 : ACS(오름차순), DESC(내림차순)        - null 가능 & 각 필터유형마다 정렬 기본값이 상이
      */
+    @Transactional(readOnly = true)
     public List<TodoDto> getTodo(
             UUID userId,
             TodoViewType viewType,
@@ -73,6 +75,28 @@ public class TodoService {
             int page,
             int size
     ) {
+        // 0. sortType, direction, year null 체크 및 page/size 유효성 체크
+        // year 필수 값으로 
+        if (year == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "year는 필수입니다.");
+        }
+        // sortType null이면, CREATED_AT로 설정
+        if (sortType == null) {
+            sortType = SortType.CREATED_AT;
+        }
+        // direction null이면, DESC로 설정
+        if (direction == null) {
+            direction = SortDirection.DESC;
+        }
+
+        // page/size 유효성 체크
+        if (page < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "page는 0 이상이어야 합니다.");
+        }
+        if (size <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "size는 1 이상이어야 합니다.");
+        }
+
         // 1. 사용자 존재 확인
         userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
@@ -199,7 +223,6 @@ public class TodoService {
      * 3. 할일 수정 (단일 유저)
      * 수정 가능한 필드 : title, description, startDate, endDate, Priority, completed, categories
      */
-    @Transactional
     public TodoDto updateTodo(TodoUpdateRequestDTO dto) {
 
         // 0. 유저 존재 확인
@@ -271,6 +294,7 @@ public class TodoService {
     /*
      * 4. 할일 단건 조회 (단일 유저)
      */
+    @Transactional(readOnly = true)
     public TodoDto getTodoDetail(UUID userId, UUID todoId) {
         // 1. 유저 존재 확인
         userRepository.findById(userId)
@@ -284,7 +308,6 @@ public class TodoService {
         return new TodoDto(todo);
     }
 
-    @Transactional
     public TodoDto deleteTodo(UUID userId, UUID todoId) {
         // 1. 유저 존재 확인
         userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
