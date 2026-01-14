@@ -248,9 +248,9 @@ public class TodoService {
             List<CategoryEntity> categories = categoryRepository.findAllByUser_IdAndNameIn(dto.getUserId(), names);
             // 4. 검증 names(수정요청으로 들어온 카테고리 이름들(중복제거후))와, categories(DB에서 실제로 찾아온 CategoryEntity 목록)의 사이즈를 비교
             // 다르다면, 올바로 category가 매핑 처리 되지 않은 것이므로 에러처리
-            if (categories.size() != dto.getCategories().size()) {
-                throw new IllegalArgumentException("Some categories not found");
-            }
+             if (categories.size() != names.size()) {
+                 throw new IllegalArgumentException("Some categories not found");
+             }
             // 5. 매핑 재생성
             for (CategoryEntity category : categories) {
                 // todoEntity를 선언한 CategoryLinks 재생성
