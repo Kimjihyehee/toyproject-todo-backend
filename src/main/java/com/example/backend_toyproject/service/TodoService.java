@@ -256,6 +256,8 @@ public class TodoService {
 
         // 수정 여부 변수선언
         boolean isUpdated = false;
+        // 완료 상태 변경 여부를 표시하는 플래그 <- (UPDATED로 덮어쓰지 않기 위함)
+        boolean isCompletedUpdated = false;
 
         // 수정값 update
         if(dto.getTitle() != null) {
@@ -270,9 +272,10 @@ public class TodoService {
             todo.setPriority(dto.getPriority());    
             isUpdated = true;
         }
-        if(dto.getCompleted() != null) {
-            todo.setCompleted(dto.getCompleted());
+        if(dto.getCompleted() != null) { // 할일 완료여부를 수정 요청인 경우
+            todo.setCompleted(dto.getCompleted()); // entity의 setCompleted() : 수정용 값 set
             isUpdated = true;
+            isCompletedUpdated = true; // setCompleted로 set된 값을 유지하기 위한 플래그
         }
         // category 필드 수정 의도 있을 경우
         if(dto.getCategories() != null) {
@@ -300,9 +303,9 @@ public class TodoService {
             }
             isUpdated = true;
         }
-        //
-        // todo 변경 시 -> TodoStatus : UPDATED로 변경
-        if(isUpdated == true) { 
+
+        // 완료 변경이 없는 일반 수정일 때만 UPDATED로 상태 갱신
+        if(isUpdated && !isCompletedUpdated) {
             todo.setStatus(TodoStatus.UPDATED);
         }
 
