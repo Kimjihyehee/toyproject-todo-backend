@@ -326,6 +326,9 @@ public class TodoService {
         return new TodoDto(todo);
     }
 
+    /*
+     * 5. 할일 삭제
+     */
     public TodoDto deleteTodo(UUID userId, UUID todoId) {
         // 1. 유저 존재 확인
         userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));

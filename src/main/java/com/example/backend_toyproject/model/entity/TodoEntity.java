@@ -105,5 +105,12 @@ public class TodoEntity {
             this.completedAt = null;
         }
     }
-}
 
+    // deletedAt값 입력 시 -> status를 DELETED로 동기화
+    public void setDeletedAt(Timestamp deletedAt) {
+        this.deletedAt = deletedAt;
+        if (deletedAt != null) {
+            this.status = TodoStatus.DELETED;
+        }
+    }
+}
