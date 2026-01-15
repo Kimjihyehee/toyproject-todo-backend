@@ -279,13 +279,16 @@ public class TodoService {
             // 1. 기존 매핑(categoryLinks) 제거
             todo.getCategoryLinks().clear();
 
-            // category에 있는 값을 수정요청했는지 요청값 존재 확인 (list형태로 입력되고, 그 값들중 categoryRepository의 name값에 속하는지 각각 확인해야함)
-            // 2. 수정요청받는 DTO의 카테고리 이름 목록에서 중복제거 후 list로 묶음
-            List<String> names = dto.getCategories().stream().distinct().toList();
-            // 3. DB에서 이 유저 소유인 카테고리 중에서, 이름이 names에 포함되는 것들 모두 전부 조회
+            // 2. 요청된 카테고리 이름 목록에서 중복 여부를 먼저 검증
+            //    중복이면 입력 오류로 간주하고 예외 처리
+            List<String> rawNames = dto.getCategories();
+            List<String> names = rawNames.stream().distinct().toList();
+            if (rawNames.size() != names.size()) {
+                throw new IllegalArgumentException("Duplicate category names");
+            }
+            // 3. DB에서 유저 소유 카테고리 중 이름이 names에 포함되는 항목 조회
             List<CategoryEntity> categories = categoryRepository.findAllByUser_IdAndNameIn(dto.getUserId(), names);
-            // 4. 검증 names(수정요청으로 들어온 카테고리 이름들(중복제거후))와, categories(DB에서 실제로 찾아온 CategoryEntity 목록)의 사이즈를 비교
-            // 다르다면, 올바로 category가 매핑 처리 되지 않은 것이므로 에러처리
+            // 4. 요청 이름과 조회 결과의 개수가 다르면 존재하지 않는 카테고리가 포함된 상황이므로 예외처리
              if (categories.size() != names.size()) {
                  throw new IllegalArgumentException("Some categories not found");
              }
