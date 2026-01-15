@@ -224,14 +224,37 @@ public class TodoService {
      * 수정 가능한 필드 : title, description, startDate, endDate, Priority, completed, categories
      */
     public TodoDto updateTodo(TodoUpdateRequestDTO dto) {
-
         // 0. 유저 존재 확인
         userRepository.findById(dto.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found: " + dto.getUserId()));
 
         // 1. 유저 해당 할일 항목의 정보(삭제되지 않은 할일만)를 조회
         TodoEntity todo = todoRepository.findByIdAndUser_IdAndDeletedAtIsNull(dto.getTodoId(), dto.getUserId()).orElseThrow(() -> new IllegalArgumentException("Todo not found:"));
 
-        // 수정 여부 확인
+        // ------------------------------- StartDate, EndDate 설정 -------------------------------
+        // StartDate가 null -> 기존값 유지
+        LocalDateTime start = dto.getStartDate() != null
+                ? dto.getStartDate().toLocalDateTime()
+                : todo.getStartDate().toLocalDateTime();
+
+        // EndDate가 null -> 기존값 유지
+        LocalDateTime end = dto.getEndDate() != null
+                ? dto.getEndDate().toLocalDateTime()
+                : todo.getEndDate().toLocalDateTime();
+
+        // 검증
+        if (!start.isBefore(end)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "startDate는 endDate보다 이전이어야 합니다."
+            );
+        }
+
+         // 검증 통과 시, 반영
+        todo.setStartDate(Timestamp.valueOf(start));
+        todo.setEndDate(Timestamp.valueOf(end));
+        // --------------------------------------------------------------------------------------
+
+        // 수정 여부 변수선언
         boolean isUpdated = false;
 
         // 수정값 update
@@ -241,14 +264,6 @@ public class TodoService {
         }
         if(dto.getDescription() != null) {
             todo.setDescription(dto.getDescription());
-            isUpdated = true;
-        }
-        if(dto.getStartDate() != null) {
-            todo.setStartDate(dto.getStartDate());
-            isUpdated = true;
-        }
-        if(dto.getEndDate() != null) {
-            todo.setEndDate(dto.getEndDate());
             isUpdated = true;
         }
         if(dto.getPriority() != null) {

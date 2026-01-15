@@ -34,10 +34,10 @@ public class TodoEntity {
     @Column(name = "description", length = 1000)
     private String description;
 
-    @Column(name = "start_date")
+    @Column(name = "start_date", nullable = false)
     private Timestamp startDate;
 
-    @Column(name = "end_date")
+    @Column(name = "end_date", nullable = false)
     private Timestamp endDate;
 
     @Enumerated(EnumType.STRING)
