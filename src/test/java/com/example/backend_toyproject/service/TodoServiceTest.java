@@ -458,6 +458,57 @@ class TodoServiceTest {
     }
 
     @Test
+    @DisplayName("updateTodo - startDate가 endDate보다 이전이 아니면 400 예외가 발생한다")
+    void testUpdateTodo_InvalidDateRange_ThrowsBadRequest() {
+        // given
+        UserEntity user = saveFakeUser();
+        TodoEntity todo = saveTodo(
+                user,
+                "todo",
+                Timestamp.valueOf("2026-01-01 09:00:00"),
+                Timestamp.valueOf("2026-01-01 10:00:00")
+        );
+
+        TodoUpdateRequestDTO dto = new TodoUpdateRequestDTO();
+        dto.setTodoId(todo.getId());
+        dto.setUserId(user.getId());
+        dto.setStartDate(Timestamp.valueOf("2026-01-02 10:00:00"));
+        dto.setEndDate(Timestamp.valueOf("2026-01-02 10:00:00"));
+
+        // when & then
+        assertThatThrownBy(() -> todoService.updateTodo(dto))
+                .isInstanceOfSatisfying(ResponseStatusException.class, ex ->
+                        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST)
+                );
+    }
+
+    @Test
+    @DisplayName("updateTodo - 날짜가 일부만 주어지면 나머지는 기존 값 유지된다")
+    void testUpdateTodo_PartialDateUpdate_KeepsOtherDate() {
+        // given
+        UserEntity user = saveFakeUser();
+        Timestamp originalStart = Timestamp.valueOf("2026-01-01 09:00:00");
+        Timestamp originalEnd = Timestamp.valueOf("2026-01-01 10:00:00");
+        TodoEntity todo = saveTodo(user, "todo", originalStart, originalEnd);
+
+        TodoUpdateRequestDTO dto = new TodoUpdateRequestDTO();
+        dto.setTodoId(todo.getId());
+        dto.setUserId(user.getId());
+        dto.setEndDate(Timestamp.valueOf("2026-01-01 11:00:00"));
+
+        // when
+        TodoDto updated = todoService.updateTodo(dto);
+
+        // then
+        assertThat(updated.getStartDate()).isEqualTo(originalStart);
+        assertThat(updated.getEndDate()).isEqualTo(Timestamp.valueOf("2026-01-01 11:00:00"));
+
+        TodoEntity saved = todoRepository.findById(todo.getId()).orElseThrow();
+        assertThat(saved.getStartDate()).isEqualTo(originalStart);
+        assertThat(saved.getEndDate()).isEqualTo(Timestamp.valueOf("2026-01-01 11:00:00"));
+    }
+
+    @Test
     @DisplayName("updateTodo - categories가 주어지면 기존 매핑이 전부 교체된다")
     void testUpdateTodo_CategoriesReplaced_Success() {
         // given
@@ -567,7 +618,7 @@ class TodoServiceTest {
         // when & then
         assertThatThrownBy(() -> todoService.updateTodo(dto))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Some categories not found");
+                .hasMessageContaining("Duplicate category names");
     }
 
     @Test
