@@ -9,6 +9,7 @@ import com.example.backend_toyproject.model.entity.UserEntity;
 import com.example.backend_toyproject.model.enums.Priority;
 import com.example.backend_toyproject.model.enums.SortDirection;
 import com.example.backend_toyproject.model.enums.SortType;
+import com.example.backend_toyproject.model.enums.TodoStatus;
 import com.example.backend_toyproject.model.enums.TodoViewType;
 import com.example.backend_toyproject.repository.CategoryRepository;
 import com.example.backend_toyproject.repository.TodoRepository;
@@ -448,6 +449,8 @@ class TodoServiceTest {
         assertThat(updated.getDescription()).isEqualTo("new-desc");
         assertThat(updated.getPriority()).isEqualTo(Priority.URGENT);
         assertThat(updated.isCompleted()).isTrue();
+        assertThat(updated.getStatus()).isEqualTo(TodoStatus.COMPLETED);
+        assertThat(updated.getCompletedAt()).isNotNull();
 
         // then (DB)
         TodoEntity saved = todoRepository.findById(todo.getId()).orElseThrow();
@@ -455,6 +458,42 @@ class TodoServiceTest {
         assertThat(saved.getDescription()).isEqualTo("new-desc");
         assertThat(saved.getPriority()).isEqualTo(Priority.URGENT);
         assertThat(saved.isCompleted()).isTrue();
+        assertThat(saved.getStatus()).isEqualTo(TodoStatus.COMPLETED);
+        assertThat(saved.getCompletedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("updateTodo - completed=false로 변경 시 completedAt이 null로 초기화된다")
+    void testUpdateTodo_CompletedFalse_ClearsCompletedAt() {
+        // given
+        UserEntity user = saveFakeUser();
+        TodoEntity todo = saveTodo(
+                user,
+                "todo",
+                Timestamp.valueOf("2026-01-01 09:00:00"),
+                Timestamp.valueOf("2026-01-01 10:00:00")
+        );
+        todo.setCompleted(true);
+        todoRepository.saveAndFlush(todo);
+
+        TodoUpdateRequestDTO dto = new TodoUpdateRequestDTO();
+        dto.setTodoId(todo.getId());
+        dto.setUserId(user.getId());
+        dto.setCompleted(false);
+
+        // when
+        TodoDto updated = todoService.updateTodo(dto);
+
+        // then (반환 DTO)
+        assertThat(updated.isCompleted()).isFalse();
+        assertThat(updated.getCompletedAt()).isNull();
+        assertThat(updated.getStatus()).isEqualTo(TodoStatus.UPDATED);
+
+        // then (DB)
+        TodoEntity saved = todoRepository.findById(todo.getId()).orElseThrow();
+        assertThat(saved.isCompleted()).isFalse();
+        assertThat(saved.getCompletedAt()).isNull();
+        assertThat(saved.getStatus()).isEqualTo(TodoStatus.UPDATED);
     }
 
     @Test
