@@ -95,12 +95,11 @@ public class TodoEntity {
 
         this.priority = todoDto.getPriority() != null ? todoDto.getPriority() : Priority.NORMAL;
         this.completed = todoDto.isCompleted();
-
-        // 할일을 완료한 경우 -> status : COMPLETED, completedAt : 완료한 시간
         if(this.completed) {
-            this.status = TodoStatus.COMPLETED; // status도 COMPLTED
+            // 할일완료로 첫 입력한 경우
+            this.status = TodoStatus.COMPLETED;
             this.completedAt = new Timestamp(System.currentTimeMillis());
-        } else { // 할일을 완료하지 않은 경우 -> status : CREATED, completedAt : null
+        } else { // 할일 미완료로 첫 입력한 경우
             this.status = TodoStatus.CREATED;
             this.completedAt = null;
         }
@@ -111,6 +110,20 @@ public class TodoEntity {
         this.deletedAt = deletedAt;
         if (deletedAt != null) {
             this.status = TodoStatus.DELETED;
+        }
+    }
+
+    // completed 수정시 사용 - status, completedAt 동기화
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+        if (completed) {
+            // 할일 완료로 수정한 경우
+            this.status = TodoStatus.COMPLETED;
+            this.completedAt = new Timestamp(System.currentTimeMillis());
+        } else {
+            // 할일 미완료로 수정한 경우
+            this.status = TodoStatus.UPDATED;
+            this.completedAt = null;
         }
     }
 }
