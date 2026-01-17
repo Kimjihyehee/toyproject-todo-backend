@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user")
+@Table(name = "todo_user")
 @Getter
 @Setter
 @NoArgsConstructor

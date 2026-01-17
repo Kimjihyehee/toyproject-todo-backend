@@ -35,14 +35,10 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+    runtimeOnly 'org.postgresql:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // Swagger/OpenAPI 추가
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
-
-    // SQLite 추가
-    implementation 'org.xerial:sqlite-jdbc:3.45.1.0'     // SQLite JDBC 드라이버
-    implementation 'org.hibernate.orm:hibernate-community-dialects:6.4.4.Final'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"  // SQLite Dialect for Hibernate
 }
 
 tasks.named('test') {
