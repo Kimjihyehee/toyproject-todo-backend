@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional 
+@Transactional
 @RequiredArgsConstructor
 public class TodoService {
     private final TodoRepository todoRepository;
@@ -53,8 +53,7 @@ public class TodoService {
         // user 정보 Entity에 연결
         todoEntity.setUser(user);
         // 저장
-        TodoEntity savedTodoEntity = todoRepository.save(todoEntity);
-        return new TodoDto(savedTodoEntity);
+        return new TodoDto(todoRepository.save(todoEntity));
     }
 
     /*
@@ -152,7 +151,7 @@ public class TodoService {
                 );
             }
         }
-        else if (month != null && day != null) { // 입력 : 년월일
+        else if (month != null) { // 입력 : 년월일
             try {
                 LocalDateTime queryStart = LocalDateTime.of(year, month, day, 0, 0);
                 LocalDateTime queryEnd = queryStart.plusDays(1);
@@ -228,7 +227,7 @@ public class TodoService {
         userRepository.findById(dto.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found: " + dto.getUserId()));
 
         // 1. 유저 해당 할일 항목의 정보(삭제되지 않은 할일만)를 조회
-        TodoEntity todo = todoRepository.findByIdAndUser_IdAndDeletedAtIsNull(dto.getTodoId(), dto.getUserId()).orElseThrow(() -> new IllegalArgumentException("Todo not found:"));
+        TodoEntity todo = todoRepository.findByIdAndDeletedAtIsNull(dto.getTodoId()).orElseThrow(() -> new IllegalArgumentException("Todo not found:"));
 
         // ------------------------------- StartDate, EndDate 설정 -------------------------------
         // StartDate가 null -> 기존값 유지
@@ -256,7 +255,7 @@ public class TodoService {
 
         // 수정 여부 변수선언
         boolean isUpdated = false;
-        // 완료 상태 변경 여부를 표시하는 플래그 <- (UPDATED로 덮어쓰지 않기 위함)
+        // 완료 상태 변경 여부 플래그
         boolean isCompletedUpdated = false;
 
         // 수정값 update
@@ -272,10 +271,10 @@ public class TodoService {
             todo.setPriority(dto.getPriority());    
             isUpdated = true;
         }
-        if(dto.getCompleted() != null) { // 할일 완료여부를 수정 요청인 경우
-            todo.setCompleted(dto.getCompleted()); // entity의 setCompleted() : 수정용 값 set
+        if(dto.getCompleted() != null) {
+            todo.setCompleted(dto.getCompleted());
             isUpdated = true;
-            isCompletedUpdated = true; // setCompleted로 set된 값을 유지하기 위한 플래그
+            isCompletedUpdated = true;
         }
         // category 필드 수정 의도 있을 경우
         if(dto.getCategories() != null) {
@@ -321,7 +320,7 @@ public class TodoService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
-        TodoEntity todo = todoRepository.findByIdAndUser_IdAndDeletedAtIsNull(todoId, userId)
+        TodoEntity todo = todoRepository.findByIdAndDeletedAtIsNull(todoId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Todo not found: " + todoId)
                 );
@@ -337,7 +336,7 @@ public class TodoService {
         userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
         // 2. 해당하는 할일 항목 찾기
         // 없는 경우, 예외 처리
-        TodoEntity todo = todoRepository.findByIdAndUser_IdAndDeletedAtIsNull(todoId, userId)
+        TodoEntity todo = todoRepository.findByIdAndDeletedAtIsNull(todoId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Todo not found: " + todoId)
                 );

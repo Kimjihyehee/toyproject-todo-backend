@@ -25,7 +25,7 @@ public class TodoController {
     /*
      * 1. 할일 생성
      */
-    @PostMapping("/")
+    @PostMapping
     public TodoDto createTodo(@RequestBody TodoDto todoDto) {
         return todoService.createTodo(todoDto);
     }
@@ -61,7 +61,7 @@ public class TodoController {
      * 3. 할일 수정 (단일 유저)
      * 수정 가능한 필드 : title, description, startDate, endDate, Priority, categories
      */
-    @PatchMapping("/")
+    @PatchMapping
     public TodoDto updateTodo(@Valid @RequestBody TodoUpdateRequestDTO todoUpdateRequestDTO) {
         return todoService.updateTodo(todoUpdateRequestDTO);
     }
