@@ -5,16 +5,13 @@ import com.example.backend_toyproject.model.dto.user.UserCreateDto;
 import com.example.backend_toyproject.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
 @Validated
-public class userController {
+public class UserController {
 
     private final UserService userService;
     /*
@@ -23,5 +20,13 @@ public class userController {
     @PostMapping
     public UserDto createUser(@RequestBody UserCreateDto userCreateDto) {
         return userService.createUser(userCreateDto);
+    }
+
+    /*
+     * 2. 유저 정보 조회(단일 유저)
+     */
+    @GetMapping("/{nickName}")
+    public UserDto getUserTodo(@PathVariable String nickName) {
+        return userService.getUserTodo(nickName);
     }
 }
