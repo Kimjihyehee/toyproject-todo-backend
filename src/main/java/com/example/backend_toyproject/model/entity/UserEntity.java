@@ -1,5 +1,6 @@
 package com.example.backend_toyproject.model.entity;
 
+import com.example.backend_toyproject.model.dto.user.UserCreateDto;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,23 +42,29 @@ public class UserEntity {
     private Timestamp createdAt;
 
     @UpdateTimestamp
-    @Column(name = "modified_timestamp", nullable = false, updatable = false)
+    @Column(name = "modified_timestamp", updatable = false)
     private Timestamp modifiedAt;
 
     @UpdateTimestamp
-    @Column(name = "lastLogin_timestamp", nullable = false, updatable = false)
+    @Column(name = "lastLogin_timestamp", updatable = false)
     private Timestamp lastLoginAt;
 
-    @Column(name = "deleted_timestamp", nullable = false, updatable = false)
+    @Column(name = "deleted_timestamp")
     private Timestamp deletedAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TodoEntity> todos = new ArrayList<>();
 
     // DTO -> Entity 변환
-    public UserEntity(UserEntity userEntity) {
-        this.name = userEntity.getName() != null ? userEntity.getName() : "";
-        this.nickname = userEntity.getNickname() != null ? userEntity.getNickname() : "";
+//    public UserEntity(UserDto userDto) {
+//        this.name = userDto.getName() != null ? userDto.getName() : "";
+//        this.nickname = userDto.getNickname() != null ? userDto.getNickname() : "";
+//    }
+
+    // 유저 생성 시 필요한 생성
+    public UserEntity(UserCreateDto userCreateDto) {
+        this.name = userCreateDto.getName() != null ? userCreateDto.getName() : "";
+        this.nickname = userCreateDto.getNickname() != null ? userCreateDto.getNickname() : "";
     }
 
 }
