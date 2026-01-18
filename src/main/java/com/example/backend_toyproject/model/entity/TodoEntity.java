@@ -12,6 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -27,17 +28,17 @@ public class TodoEntity {
     @GeneratedValue
     private UUID id;
 
-    @Column(name = "user_id")
-    private UUID userId;
-
     @Column(name = "title", nullable = false)
     private String title;
 
     @Column(name = "description", length = 1000)
     private String description;
 
-    @Column(name = "due_date")
-    private Timestamp dueDate;
+    @Column(name = "start_date", nullable = false)
+    private Timestamp startDate;
+
+    @Column(name = "end_date", nullable = false)
+    private Timestamp endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "priority", nullable = false, length = 10)
@@ -74,17 +75,55 @@ public class TodoEntity {
     // DTO -> Entity 변환
     public TodoEntity(TodoDto todoDto) {
         this.id = todoDto.getId();
-        this.userId = todoDto.getUserId();
         this.title = todoDto.getTitle() != null ? todoDto.getTitle() : "";
         this.description = todoDto.getDescription();
-        this.dueDate = todoDto.getDueDate();
+        // startDate: 없으면 now
+        Timestamp start = todoDto.getStartDate() != null
+                ? todoDto.getStartDate()
+                : Timestamp.valueOf(LocalDateTime.now());
+        this.startDate = start;
+
+        // endDate: 없으면 startDate 기준 "다음날 00:00" (exclusive)
+        this.endDate = todoDto.getEndDate() != null
+                ? todoDto.getEndDate()
+                : Timestamp.valueOf(
+                start.toLocalDateTime()
+                        .toLocalDate()
+                        .plusDays(1)
+                        .atStartOfDay()
+        );
+
         this.priority = todoDto.getPriority() != null ? todoDto.getPriority() : Priority.NORMAL;
-        this.status = todoDto.getStatus() != null ? todoDto.getStatus() : TodoStatus.CREATED;
         this.completed = todoDto.isCompleted();
-        this.completedAt = todoDto.getCompletedAt() != null ? todoDto.getCompletedAt() : todoDto.getCreatedAt();
-        this.createdAt = todoDto.getCreatedAt();
-        this.updatedAt = todoDto.getUpdatedAt();
-        this.deletedAt = todoDto.getDeletedAt();
+        if(this.completed) {
+            // 할일완료로 첫 입력한 경우
+            this.status = TodoStatus.COMPLETED;
+            this.completedAt = new Timestamp(System.currentTimeMillis());
+        } else { // 할일 미완료로 첫 입력한 경우
+            this.status = TodoStatus.CREATED;
+            this.completedAt = null;
+        }
+    }
+
+    // deletedAt값 입력 시 -> status를 DELETED로 동기화
+    public void setDeletedAt(Timestamp deletedAt) {
+        this.deletedAt = deletedAt;
+        if (deletedAt != null) {
+            this.status = TodoStatus.DELETED;
+        }
+    }
+
+    // completed 수정시 사용 - status, completedAt 동기화
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+        if (completed) {
+            // 할일 완료로 수정한 경우
+            this.status = TodoStatus.COMPLETED;
+            this.completedAt = new Timestamp(System.currentTimeMillis());
+        } else {
+            // 할일 미완료로 수정한 경우
+            this.status = TodoStatus.UPDATED;
+            this.completedAt = null;
+        }
     }
 }
-

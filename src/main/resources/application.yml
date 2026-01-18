@@ -8,17 +8,13 @@ spring:
 #      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
 
   datasource:
-    url: jdbc:sqlite:todo.db
-    driver-class-name: org.sqlite.JDBC
-    # Connection Pool
-    hikari:
-      maximum-pool-size: 1
-      connection-timeout: 30000
-      idle-timeout: 60000
-      max-lifetime: 1800000
+    url: jdbc:postgresql://localhost:5432/testdb
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
 
   jpa:
-    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: true # 실행되는 SQL을 콘솔에 출력
