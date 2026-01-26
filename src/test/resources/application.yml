@@ -1,15 +1,50 @@
 spring:
+  application:
+    name: backend_Toyproject
+
   datasource:
-    url: "jdbc:sqlite::memory:"
-    driver-class-name: org.sqlite.JDBC
-    hikari:
-      maximum-pool-size: 1
+    url: jdbc:postgresql://localhost:5432/backend_toyproject_test
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
 
   jpa:
-    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
-    show-sql: false
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        highlight_sql: true
+        jdbc:
+          batch_size: 0
+        order_inserts: false
+        order_updates: true
     open-in-view: false
+    defer-datasource-initialization: true
 
+  sql:
+    init:
+      mode: always
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /api-docs
+  show-actuator: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web: DEBUG
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
