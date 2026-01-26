@@ -227,7 +227,7 @@ public class TodoService {
         userRepository.findById(dto.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found: " + dto.getUserId()));
 
         // 1. 유저 해당 할일 항목의 정보(삭제되지 않은 할일만)를 조회
-        TodoEntity todo = todoRepository.findByIdAndDeletedAtIsNull(dto.getTodoId()).orElseThrow(() -> new IllegalArgumentException("Todo not found:"));
+        TodoEntity todo = todoRepository.findByIdAndUser_IdAndDeletedAtIsNull( dto.getTodoId(), dto.getUserId()).orElseThrow(() -> new IllegalArgumentException("Todo not found:"));
 
         // ------------------------------- StartDate, EndDate 설정 -------------------------------
         // StartDate가 null -> 기존값 유지
@@ -320,7 +320,7 @@ public class TodoService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
-        TodoEntity todo = todoRepository.findByIdAndDeletedAtIsNull(todoId)
+        TodoEntity todo = todoRepository.findByIdAndUser_IdAndDeletedAtIsNull(todoId, userId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Todo not found: " + todoId)
                 );
@@ -336,7 +336,7 @@ public class TodoService {
         userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
         // 2. 해당하는 할일 항목 찾기
         // 없는 경우, 예외 처리
-        TodoEntity todo = todoRepository.findByIdAndDeletedAtIsNull(todoId)
+        TodoEntity todo = todoRepository.findByIdAndUser_IdAndDeletedAtIsNull(todoId, userId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Todo not found: " + todoId)
                 );
