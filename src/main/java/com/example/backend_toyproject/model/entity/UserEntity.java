@@ -1,6 +1,6 @@
 package com.example.backend_toyproject.model.entity;
 
-import com.example.backend_toyproject.model.dto.user.UserCreateDto;
+import com.example.backend_toyproject.model.dto.UserDto;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -62,9 +62,9 @@ public class UserEntity {
 //    }
 
     // 유저 생성 시 필요한 생성
-    public UserEntity(UserCreateDto userCreateDto) {
-        this.name = userCreateDto.getName() != null ? userCreateDto.getName() : "";
-        this.nickname = userCreateDto.getNickname() != null ? userCreateDto.getNickname() : "";
+    public UserEntity(UserDto dto) {
+        this.name = dto.getName() != null ? dto.getName() : "";
+        this.nickname = dto.getNickname() != null ? dto.getNickname() : "";
     }
 
 }

@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     // 1. [조회] 동일한 닉네임값을 가진 유저가 존재하는지 확인
-    boolean existsByNickname(String nickname);
+    boolean existsByNicknameAndDeletedAtIsNull(String nickname);
     // 2. [조회] 유저 정보 조회
     Optional<UserEntity> findByNicknameAndDeletedAtIsNull(String nickname);
 }
