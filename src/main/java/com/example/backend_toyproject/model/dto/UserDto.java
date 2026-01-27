@@ -1,28 +1,48 @@
 package com.example.backend_toyproject.model.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import com.example.backend_toyproject.model.entity.TodoCategoryMappingEntity;
+import com.example.backend_toyproject.model.entity.UserEntity;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Setter
 @Getter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserDto {
-    @Schema(description = "유저의 id", example = "00000000-0000-4000-a000-000000000000")
     private UUID id;
-    @NotNull(message = "name은 필수입니다.")
-    @Schema(description = "유저의 이름", example = "유저의 이름입니다.")
     private String name;
-    @NotNull(message = "nickname은 필수입니다.")
-    @Schema(description = "유저의 닉네임", example = "유저의 닉네임입니다.")
     private String nickname;
-    @Schema(description = "계정 생성 시간", example = "2024-01-15T10:30:00", accessMode = Schema.AccessMode.READ_ONLY)
-    private LocalDateTime createdAt;
+    private Timestamp createdAt;
+    private Timestamp modifiedAt;
+    private Timestamp lastLoginAt;
+    private Timestamp deletedAt;
+    private List<TodoDto> todos;
+    private List<CategorySummaryDto> categories;
+
+    // Entity -> DTO 변환
+    public UserDto(UserEntity userEntity) {
+        this.id = userEntity.getId();
+        this.name = userEntity.getName();
+        this.nickname = userEntity.getNickname();
+        this.createdAt = userEntity.getCreatedAt();
+        this.modifiedAt = userEntity.getModifiedAt();
+        this.lastLoginAt = userEntity.getLastLoginAt();
+        this.deletedAt = userEntity.getDeletedAt();
+        this.todos = userEntity.getTodos().stream()
+                .map(TodoDto::new)
+                .toList();
+        this.categories = userEntity.getTodos().stream()
+                .flatMap(todo -> todo.getCategoryLinks().stream())
+                .map(TodoCategoryMappingEntity::getCategory)
+                .filter(Objects::nonNull)
+                .map(CategorySummaryDto::new)
+                .distinct()
+                .toList();
+    }
 }
