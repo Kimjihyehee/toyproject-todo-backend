@@ -18,7 +18,7 @@ public class CategorySummaryDto {
     private String description;
     private boolean uncategorized;
 
-    // DTO -> Entity 변환
+    // Entity -> dto 변환
     public CategorySummaryDto(CategoryEntity entity) {
         this.id = entity.getId();
         this.name = entity.getName();
