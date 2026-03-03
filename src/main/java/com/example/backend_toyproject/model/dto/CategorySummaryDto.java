@@ -15,6 +15,7 @@ import java.util.UUID;
 public class CategorySummaryDto {
     private UUID id;
     private String name;
+    private UUID userId;
     private String description;
     private boolean uncategorized;
 
@@ -22,6 +23,7 @@ public class CategorySummaryDto {
     public CategorySummaryDto(CategoryEntity entity) {
         this.id = entity.getId();
         this.name = entity.getName();
+        this.userId = entity.getUser().getId();
         this.description = entity.getDescription();
         this.uncategorized = entity.isUncategorized();
     }
