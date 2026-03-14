@@ -37,12 +37,6 @@ public class CategoryEntity {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "uncategorized", nullable = false)
-    private boolean uncategorized = false;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
@@ -65,7 +59,5 @@ public class CategoryEntity {
     public CategoryEntity(CategorySummaryDto categorySummaryDto) {
         this.id = categorySummaryDto.getId();
         this.name = categorySummaryDto.getName();
-        this.description = categorySummaryDto.getDescription();
-        this.uncategorized = categorySummaryDto.isUncategorized();
     }
 }
