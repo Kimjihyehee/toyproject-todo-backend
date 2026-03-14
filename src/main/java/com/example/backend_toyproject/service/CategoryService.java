@@ -51,7 +51,7 @@ public class CategoryService {
      */
     public boolean isDuplicateCategoryName(String name, UUID userId) {
         // 카테고리 테이블에 사용자 id를 기반으로 같은 카테고리명이 존재하는지 확인
-      return categoryRepository.existsByCategoryNameAndUserId(name, userId);
+      return categoryRepository.existsByNameAndUser_Id(name, userId);
     }
 
     /*
@@ -66,7 +66,7 @@ public class CategoryService {
             throw new IllegalArgumentException("Duplicate category names");
         };
         // 2. dto의 categoryId로 해당 row의 category_name 업데이트
-        CategoryEntity category = categoryRepository.findByCategory_Id(dto.getId()).orElseThrow(() -> new IllegalArgumentException("Category not found: " + dto.getId()));
+        CategoryEntity category = categoryRepository.findById(dto.getId()).orElseThrow(() -> new IllegalArgumentException("Category not found: " + dto.getId()));
         category.setName(dto.getName());
         categoryRepository.save(category);
         return new CategorySummaryDto(category);
