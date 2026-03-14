@@ -195,6 +195,18 @@ class CategoryServiceTest {
         assertThat(deleted.getDeletedAt()).isNotNull();
     }
 
+    @Test
+    @DisplayName("deleteCategory - 존재하지 않는 카테고리 id면 IllegalArgumentException 발생")
+    void testDeleteCategory_CategoryNotFound_Throws() {
+        // given
+        UUID missingCategoryId = UUID.randomUUID();
+
+        // when & then
+        assertThatThrownBy(() -> categoryService.deleteCategory(missingCategoryId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Category not found");
+    }
+
     private UserEntity saveFakeUser() {
         UserEntity user = new UserEntity();
         user.setName("test-user");
