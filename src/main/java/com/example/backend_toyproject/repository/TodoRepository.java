@@ -17,5 +17,5 @@ public interface TodoRepository extends JpaRepository<TodoEntity, UUID> {
     // UUID user(UserEntity user);
 
     // 할일 단건 조회 (단일 유저)
-    Optional<TodoEntity> findByIdAndDeletedAtIsNull(UUID todoId);
+    Optional<TodoEntity> findByIdAndUser_IdAndDeletedAtIsNull(UUID todoId, UUID userId);
 }

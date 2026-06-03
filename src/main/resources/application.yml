@@ -29,6 +29,11 @@ spring:
         order_inserts: false
         order_updates: true
     open-in-view: false # Service계층만 DB 접근
+    defer-datasource-initialization: true #JPA가 테이블 만든 뒤에 SQL 실행
+
+  sql:
+    init:
+      mode: always
 
 # Swagger (최상위)
 springdoc:

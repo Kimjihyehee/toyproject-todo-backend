@@ -8,4 +8,7 @@ import java.util.UUID;
 
 public interface CategoryRepository extends JpaRepository<CategoryEntity, UUID> {
     List<CategoryEntity> findAllByUser_IdAndNameIn(UUID userId, List<String> names);
+
+    // userId와 name 조합이 이미 존재하는지 확인
+    boolean existsByNameAndUser_Id(String name, UUID userId);
 }
