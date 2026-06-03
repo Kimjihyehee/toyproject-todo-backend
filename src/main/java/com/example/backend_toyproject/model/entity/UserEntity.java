@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user")
+@Table(name = "todo_user")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,11 +38,26 @@ public class UserEntity {
 
     @CreationTimestamp
     @Column(name = "created_timestamp", nullable = false, updatable = false)
-    private Timestamp createdTimestamp;
+    private Timestamp createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "modified_timestamp", nullable = false, updatable = false)
+    private Timestamp modifiedAt;
+
+    @UpdateTimestamp
+    @Column(name = "lastLogin_timestamp", nullable = false, updatable = false)
+    private Timestamp lastLoginAt;
+
+    @Column(name = "deleted_timestamp", nullable = false, updatable = false)
+    private Timestamp deletedAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TodoEntity> todos = new ArrayList<>();
 
-    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
-    private List<CategoryEntity> categories = new ArrayList<>();
+    // DTO -> Entity 변환
+    public UserEntity(UserEntity userEntity) {
+        this.name = userEntity.getName() != null ? userEntity.getName() : "";
+        this.nickname = userEntity.getNickname() != null ? userEntity.getNickname() : "";
+    }
+
 }
