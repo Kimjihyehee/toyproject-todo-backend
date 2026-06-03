@@ -55,6 +55,8 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TodoEntity> todos = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
+    private List<CategoryEntity> categories = new ArrayList<>();
     // DTO -> Entity 변환
 //    public UserEntity(UserDto userDto) {
 //        this.name = userDto.getName() != null ? userDto.getName() : "";
