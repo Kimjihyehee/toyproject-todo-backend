@@ -41,6 +41,9 @@ dependencies {
     // SQLite 추가
     implementation 'org.xerial:sqlite-jdbc:3.45.1.0'     // SQLite JDBC 드라이버
     implementation 'org.hibernate.orm:hibernate-community-dialects:6.4.4.Final'  // SQLite Dialect for Hibernate
+
+    // 테스트 DB
+    testImplementation 'com.h2database:h2'
 }
 
 tasks.named('test') {
