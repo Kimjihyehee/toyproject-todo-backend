@@ -1,6 +1,7 @@
 package com.example.backend_toyproject.model.entity;
 
 import com.example.backend_toyproject.model.dto.UserDto;
+import com.example.backend_toyproject.model.dto.user.UserCreateDto;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,16 +56,12 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TodoEntity> todos = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = { CascadeType.PERSIST, CascadeType.MERGE,
+            CascadeType.REMOVE }, orphanRemoval = true)
     private List<CategoryEntity> categories = new ArrayList<>();
-    // DTO -> Entity 변환
-//    public UserEntity(UserDto userDto) {
-//        this.name = userDto.getName() != null ? userDto.getName() : "";
-//        this.nickname = userDto.getNickname() != null ? userDto.getNickname() : "";
-//    }
 
-    // 유저 생성 시 필요한 생성
-    public UserEntity(UserDto dto) {
+    // DTO -> Entity 변환
+    public UserEntity(UserCreateDto dto) {
         this.name = dto.getName() != null ? dto.getName() : "";
         this.nickname = dto.getNickname() != null ? dto.getNickname() : "";
     }

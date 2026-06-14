@@ -1,6 +1,7 @@
 package com.example.backend_toyproject.service;
 
 import com.example.backend_toyproject.model.dto.UserDto;
+import com.example.backend_toyproject.model.dto.user.UserCreateDto;
 import com.example.backend_toyproject.model.entity.UserEntity;
 import com.example.backend_toyproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class UserService {
     /*
      * 1. 유저 생성
      */
-    public UserDto createUser(UserDto dto) {
+    public UserDto createUser(UserCreateDto dto) {
         // nickname 중복 사용자가 있는지 확인후 있으면 예외처리
         if (userRepository.existsByNicknameAndDeletedAtIsNull(dto.getNickname())) {
             throw new IllegalArgumentException("이미 사용중인 닉네임이 존재합니다.");

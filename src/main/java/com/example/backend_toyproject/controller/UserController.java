@@ -1,24 +1,25 @@
 package com.example.backend_toyproject.controller;
 
 import com.example.backend_toyproject.model.dto.UserDto;
+import com.example.backend_toyproject.model.dto.user.UserCreateDto;
+import jakarta.validation.Valid;
 import com.example.backend_toyproject.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
-@Validated
 public class UserController {
 
     private final UserService userService;
+
     /*
      * 1. 유저 생성
      * 입력받는 필드 : name, nickName(unique)
      */
     @PostMapping
-    public UserDto createUser(@RequestBody UserDto dto) {
+    public UserDto createUser(@Valid @RequestBody UserCreateDto dto) {
         return userService.createUser(dto);
     }
 

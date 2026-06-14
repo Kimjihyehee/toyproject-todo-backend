@@ -1,7 +1,8 @@
 package com.example.backend_toyproject.model.dto.user;
+
 import lombok.*;
-import java.sql.Timestamp;
-import java.util.UUID;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Setter
 @Getter
@@ -9,8 +10,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserCreateDto {
-    private UUID id;
+    @NotBlank
     private String name;
+    @NotBlank
+    @Size(max = 50)
     private String nickname;
-    private Timestamp createdAt;
 }
